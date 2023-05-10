@@ -21,6 +21,7 @@ import random
 import sys
 import socket
 import time
+import re
 
 from unittest import SkipTest
 from xml.dom import minidom
@@ -28,6 +29,7 @@ from xml.dom import minidom
 import six
 from six.moves import http_client
 from six.moves import urllib
+from six.moves.urllib.parse import urlparse
 from swiftclient import get_auth
 
 from swift.common import constraints
@@ -220,8 +222,7 @@ class Connection(object):
 
     @property
     def storage_url(self):
-        return '%s://%s/%s' % (self.storage_scheme, self.storage_netloc,
-                               self.storage_path)
+        return '%s://%s%s' % (self.storage_scheme, self.storage_netloc, self.storage_path)
 
     @storage_url.setter
     def storage_url(self, value):
@@ -243,8 +244,8 @@ class Connection(object):
         # unicode and this would cause troubles when doing
         # no_safe_quote query.
         x = url.path.split('/')
-        self.storage_path = str('/%s/%s' % (x[1], x[2]))
-        self.account_name = str(x[2])
+        self.storage_path = url.path
+        self.account_name = str(x[-1])
 
     @property
     def storage_scheme(self):
@@ -299,11 +300,24 @@ class Connection(object):
         self.http_connect()
         return self.storage_path, self.storage_token
 
+    def _info_path(self):
+        URI_PATTERN_INFO = re.compile(r'/info')
+        URI_PATTERN_VERSION = re.compile(r'\/v\d+\.?\d*(\/.*)?')
+        scheme, netloc, path, params, query, fragment = urlparse(self.storage_url)
+        if URI_PATTERN_VERSION.search(path):
+            path = URI_PATTERN_VERSION.sub('/info', path)
+        elif not URI_PATTERN_INFO.search(path):
+            if path.endswith('/'):
+                path += 'info'
+            else:
+                path += '/info'
+        return path
+
     def cluster_info(self):
         """
         Retrieve the data in /info, or {} on 404
         """
-        status = self.make_request('GET', '/info',
+        status = self.make_request('GET', self._info_path(),
                                    cfg={'absolute_path': True})
         if status // 100 == 4:
             return {}
