@@ -35,6 +35,8 @@ warnings.filterwarnings('ignore', message=(
     'Python 3.6 is no longer supported by the Python core team. '
     'Therefore, support for it is deprecated in cryptography '
     'and will be removed in a future release.'))
+warnings.filterwarnings('ignore', message=('HTTPResponse.getheader() is deprecated'))
+warnings.filterwarnings('ignore', message=('Enable tracemalloc to get the object allocation'))
 
 import unittest
 

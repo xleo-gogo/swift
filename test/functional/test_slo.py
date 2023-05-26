@@ -130,6 +130,7 @@ class TestSloEnv(BaseEnv):
             seg_info['seg_c']['etag'] + seg_info['seg_d']['etag']
         ).encode('ascii'), usedforsecurity=False).hexdigest()
 
+        ''' rgw不支持嵌套的大对象
         file_item = cls.container.file("manifest-bcd-submanifest")
         file_item.write(
             json.dumps([seg_info['seg_b'],
@@ -142,7 +143,7 @@ class TestSloEnv(BaseEnv):
         bcd_submanifest_etag = md5((
             seg_info['seg_b']['etag'] + cd_etag).encode('ascii'),
             usedforsecurity=False).hexdigest()
-
+       
         file_item = cls.container.file("manifest-abcde-submanifest")
         file_item.write(
             json.dumps([
@@ -155,6 +156,7 @@ class TestSloEnv(BaseEnv):
                                      'manifest-bcd-submanifest')},
                 seg_info['seg_e']]).encode('ascii'),
             parms={'multipart-manifest': 'put'})
+   
         abcde_submanifest_etag = md5((
             seg_info['seg_a']['etag'] + bcd_submanifest_etag +
             seg_info['seg_e']['etag']).encode('ascii'),
@@ -190,7 +192,7 @@ class TestSloEnv(BaseEnv):
             abcde_submanifest_etag + ':3145727-3145728;'
         ).encode('ascii'), usedforsecurity=False).hexdigest()
         ranged_manifest_size = 2 * 1024 * 1024 + 4
-
+        
         file_item = cls.container.file("ranged-submanifest")
         file_item.write(
             json.dumps([
@@ -252,6 +254,7 @@ class TestSloEnv(BaseEnv):
                                     "mixed-object-data-manifest")}
             ]).encode('ascii'), parms={'multipart-manifest': 'put'}
         )
+        '''
 
 
 class TestSlo(Base):

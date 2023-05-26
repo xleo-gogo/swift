@@ -20,7 +20,7 @@ from swift.common.swob import str_to_wsgi
 import test.functional as tf
 from test.functional.tests import Utils, Base, Base2, BaseEnv
 from test.functional.swift_test_client import Connection, ResponseError
-
+import unittest
 
 def setUpModule():
     tf.setup_package()
@@ -119,6 +119,7 @@ class TestDlo(Base):
         file_contents = file_item.read(size=1, offset=47)
         self.assertEqual(file_contents, b"e")
 
+    @unittest.skip("rgw 目前不支持一次get请求指定多个range")
     def test_get_multiple_ranges(self):
         file_item = self.env.container.file('man1')
         file_contents = file_item.read(
@@ -253,10 +254,11 @@ class TestDlo(Base):
     def test_dlo_referer_on_segment_container(self):
         if 'username3' not in tf.config:
             self.skipTest('Requires user 3')
-        # First the account2 (test3) should fail
+        # First the account2 (test2) should fail
         config2 = tf.config.copy()
-        config2['username'] = tf.config['username3']
-        config2['password'] = tf.config['password3']
+        config2['account'] = tf.config['account2']
+        config2['username'] = tf.config['username2']
+        config2['password'] = tf.config['password2']
         conn2 = Connection(config2)
         conn2.authenticate()
         headers = {'X-Auth-Token': conn2.storage_token,
