@@ -1,0 +1,9 @@
+{
+        "python.analysis.extraPaths": [
+                ".."
+        ],
+        "python.defaultInterpreterPath": "python3.9",
+        "editor.detectIndentation": false,
+        "editor.tabSize": 4
+
+}
